@@ -4,8 +4,9 @@ from django.conf.urls import patterns, include, url
 # from django.contrib import admin
 # admin.autodiscover()
 
-urlpatterns = patterns('',
-            (r'^upload/', include('upload.urls'))
+urlpatterns = patterns('upload.views',
+            (r'^$', 'index'),
+            (r'^test/$', 'test'),
     # Examples:
     # url(r'^$', 'fileserver.views.home', name='home'),
     # url(r'^fileserver/', include('fileserver.foo.urls')),
