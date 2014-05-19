@@ -2,13 +2,11 @@
 # -*- coding: UTF-8 -*-
 
 # -----------------------------------------------------
-#  FileName:    conf.py
+#  FileName:    plugin_template.py
 #  Author  :    liuxing2@
 #  Project :    
-#  Date    :    2014-05-15 16:53
+#  Date    :    2014-05-19 13:35
 #  Descrip :    
 # -----------------------------------------------------
 
-INSTALL_PLUGINS = [
-    "plugin_test"
-]
+

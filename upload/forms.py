@@ -20,5 +20,5 @@ class UploadFileForm(forms.ModelForm):
 
     class Meta:
         model = UploadFileModel
-        fields = ['filepath']
+        fields = ['file']
 
