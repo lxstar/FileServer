@@ -14,6 +14,8 @@ from upload.forms import UploadFileForm
 from upload.models import UploadFileModel
 from hashlib import md5
 from fileserver import conf
+import base64
+import json
 
 
 def get_client_ip(request):
@@ -72,8 +74,9 @@ def model_save(model, path, request):
         True: path all right
         False: path has error
     """
-    path_list = path.split('/')
+    path_list = decode_base64(path).split('/')
     if len(path_list) == 4:
+        print model.file.size
         model.devtype = path_list[0]
         model.devhash = path_list[2][path_list[2].index('-') + 1:].upper()
         model.deversion = path_list[1]
@@ -87,7 +90,40 @@ def model_save(model, path, request):
     else:
         return False
 
+def decode_base64(base64_str):
+    """
+    use: decode base64 string
+    params: 
+        base64_str: base64 string
+    return:
+        None: base64 string error
+        string: decode string
+    """
+    if base64_str:
+        return base64.decodestring(base64_str)
+    else:
+        return None
+
+def get_error_lang(form):
+    if form.cleaned_data['lang'] in conf.ERRORS:
+        return form.cleaned_data['lang']
+    else:
+        return conf.DEFAULT_ERROR_LANG
+
+def get_error_info(lang, result_code):
+    if lang not in conf.ERRORS:
+        lang = conf.DEFAULT
+    errors = conf.ERRORS[lang]
+    error_info = {
+        'result': result_code,
+        'msgs': errors[result_code]    
+    }
+    return error_info
+
+
 def index(request):
+    error_lang = conf.DEFAULT_ERROR_LANG
+
     if request.method == 'POST':
         form = UploadFileForm(request.POST, request.FILES)
 
@@ -95,21 +131,15 @@ def index(request):
             model = form.save(commit=False)
             path = form.cleaned_data['path']
             model_save(model, path, request)
+            error_lang = get_error_lang(form)
+
             run_plugins(None, None)
 
-            return HttpResponse('success')
+            return HttpResponse(json.dumps(get_error_info(error_lang, '1000')))
         else:
             return HttpResponse('form is not valid<br>' + str(form.errors))
     else:
-        return HttpResponse("<form method='post' enctype='multipart/form-data'>\
-                                path:<input name='path' type='text'>\
-                                md5:<input name='filemd5' type='text'>\
-                                params:<input name='params' type='text'>\
-                                lang: <input name='lang' type='text'>\
-                                <input name='file' type='file'>\
-                                <input type='submit'>\
-                            </form>")
-
+        return HttpResponse(json.dumps(get_error_info(error_lang, '1006')))
 
 def run_plugins(dev_info, file_info):
     plugin = None
