@@ -9,6 +9,5 @@ curl test:
 
 
 
-curl -X POST -F file=@/tmp/uploadfile.txt -F filemd5=85B0AE3A8A708B927BF1A30DFF3C6540 -F path=d2FmLzUuMC8xOTIuMTY5LjEuMS1hYWFhLWJiYmItY2NjYy1zZGRkLzExMjNfYXBwX3Nkc2QudGFyLmd6 127.0.0.1:9999/upload/
-
+curl -X POST -F file=@/tmp/uploadfile.zip -F filemd5=4B01524E288A37D59758FA9D3EA15F00 -F path=d2FmLzUuMC8xOTIuMTY5LjEuMS1hYWFhLWJiYmItY2NjYy1zZGRkLzExMjNfYXBwX3Nkc2QudGFyLmd6 127.0.0.1:8000/upload/
 
