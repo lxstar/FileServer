@@ -5,7 +5,8 @@ from django.conf.urls import patterns, include, url
 # admin.autodiscover()
 
 urlpatterns = patterns('',
-            (r'^upload/', include('upload.urls'))
+            (r'^upload/', include('upload.urls')),
+            (r'^download/', include('download.urls'))
     # Examples:
     # url(r'^$', 'fileserver.views.home', name='home'),
     # url(r'^fileserver/', include('fileserver.foo.urls')),

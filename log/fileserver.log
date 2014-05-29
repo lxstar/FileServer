@@ -1,0 +1,13 @@
+2014-05-29 14:55:55,490 [root] INFO: load logging configuration from /home/lxstar/workspace/fileserver/fileserver/logging.cfg
+2014-05-29 15:51:41,678 [plugins] DEBUG: download plugin is_run function
+2014-05-29 15:51:41,691 [plugins] DEBUG: download plugin run function
+2014-05-29 15:51:41,691 [download] DEBUG: download view run_plugin function
+2014-05-29 15:51:55,347 [root] INFO: load logging configuration from /home/lxstar/workspace/fileserver/fileserver/logging.cfg
+2014-05-29 15:52:02,481 [plugins] DEBUG: download plugin is_run function
+2014-05-29 15:52:02,481 [plugins] DEBUG: download plugin run function
+2014-05-29 15:52:02,481 [download] DEBUG: download view run_plugin function
+2014-05-29 15:52:43,997 [root] INFO: load logging configuration from /home/lxstar/workspace/fileserver/fileserver/logging.cfg
+2014-05-29 15:52:55,616 [plugins] DEBUG: download plugin is_run function
+2014-05-29 15:52:55,616 [plugins] DEBUG: download plugin run function
+2014-05-29 15:52:55,616 [download] DEBUG: download view run_plugin function
+2014-05-29 15:53:52,437 [root] INFO: load logging configuration from /home/lxstar/workspace/fileserver/fileserver/logging.cfg

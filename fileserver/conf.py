@@ -10,9 +10,14 @@
 # -----------------------------------------------------
 
 
-# plugins install
-INSTALL_PLUGINS = [
-    "plugin_test"
+# uplaod plugins install
+INSTALL_UPLOAD_PLUGINS = [
+    "upload_plugin_template"
+]
+
+# download plugins install
+INSTALL_DOWNLOAD_PLUGINS = [
+    'download_plugin_template'
 ]
 
 # errors define
@@ -26,6 +31,7 @@ ERRORS = {
         '1005': 'language error',
         '1006': 'request method error, must be POST',
         '1007': 'file ext not allow',
+        '1008': 'upload form insufficient parameters',
         '1404': 'unknown error',
     },
     'cn': {
@@ -37,6 +43,7 @@ ERRORS = {
         '1005': '返回值语言不存在',
         '1006': '请求类型错误，必须是POST',
         '1007': '文件类型不允许',
+        '1008': '上传文件参数不足',
         '1404': '未知错误',
     }
 }
@@ -56,8 +63,11 @@ DEFAULT_FILE_TYPE = "other"
 # default file save path
 DEFAULT_FILE_PATH = "%Y/%m/%d/%H/%M/%S"
 
-# log config
-LOG_PATH = './logs/'
-# 1:CRITICAL; 2:ERROR; 3:WARNING; 4:INFO; 5:DEBUG;
-LOG_LEVEL = 5
-MAX_LOG_SIZE = 10240
+# redis conf
+REDIS_HOST = '10.7.201.130'
+REDIS_PORT = '6379'
+
+# allow save file path
+ALLOW_SAVE_PATHS = [
+    '/tmp/fileserver/',    
+]

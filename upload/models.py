@@ -12,4 +12,5 @@ class UploadFileModel(models.Model):
     filetime = models.DateTimeField(auto_now_add=True)
     filemd5 = models.CharField(max_length=32)
     filetype = models.CharField(max_length=20)
+    path = models.CharField(max_length=500)
     clientip = models.IPAddressField()

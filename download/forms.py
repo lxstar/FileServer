@@ -5,19 +5,19 @@
 #  FileName:    forms.py
 #  Author  :    liuxing2@
 #  Project :    
-#  Date    :    2014-05-16 14:07
+#  Date    :    2014-05-28 14:07
 #  Descrip :    
 # -----------------------------------------------------
 
 from django import forms
-from upload.models import UploadFileModel
+from download.models import DownloadFileModel
 
-class UploadFileForm(forms.ModelForm):
-    filemd5 = forms.CharField()
+class DownloadFileForm(forms.ModelForm):
+    filemd5 = forms.CharField(required=False)
+    path = forms.CharField()
     lang = forms.CharField(required=False)
     params = forms.CharField(required=False)
 
     class Meta:
-        model = UploadFileModel
-        fields = ['file', 'filemd5', 'path']
-
+    	model = DownloadFileModel
+    	fields = []	

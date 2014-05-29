@@ -13,10 +13,11 @@ from django.http import HttpResponse
 from upload.forms import UploadFileForm
 from upload.models import UploadFileModel
 from hashlib import md5
-from fileserver import conf
+from fileserver import conf, settings
 import base64
 import json
-from fileserver.nlogging import Logger
+import traceback
+
 import logging
 
 logger = logging.getLogger('upload')
@@ -36,6 +37,7 @@ def get_client_ip(request):
     else:
         ip = request.META.get('REMOTE_ADDR')
     return ip
+
 def get_file_md5(fp):
     """
     use: 
@@ -48,6 +50,7 @@ def get_file_md5(fp):
     md5_obj = md5()
     md5_obj.update(fp.read())
     return md5_obj.hexdigest().upper()
+
 def get_error_lang(form):
     """
     use: 
@@ -64,6 +67,7 @@ def get_error_lang(form):
         return form.cleaned_data['lang']
     else:
         return conf.DEFAULT_ERROR_LANG
+
 def get_error_info(lang, result_code):
     """
     use: 
@@ -82,6 +86,7 @@ def get_error_info(lang, result_code):
         'msgs': errors[result_code]    
     }
     return error_info
+
 def get_decode_base64_str(base64_str):
     """
     use: 
@@ -98,28 +103,72 @@ def get_decode_base64_str(base64_str):
         return None
 
 def get_file_type(filename):
+    """
+    use:
+        get filetype from filename
+    params:
+        filename: such as 'xxx_filetype_xxx_xx_xx.xxx'
+                  two '_' must, if not filetype='other'
+    return:
+        filetype
+    """
     filename_list = filename.split('_')
     if len(filename_list) > 2:
         return filename_list[1]
     else:
         return conf.DEFAULT_FILE_TYPE
 
-def get_dev_file_info():
-    return {}, {}
+def get_dev_file_info(model):
+    """
+    use:
+        get dev_info and file_info from model
+    params:
+        upload model include dev and file infos
+    return dev_info, file_info
+    """
+    dev_info = {}
+    file_info = {}
+
+    if model:
+
+        dev_info = {
+            'devtype': model.devtype,
+            'devhash': model.devhash,
+            'devip': model.devip,
+            'deversion': model.deversion
+        }
+
+        file_info = {
+            'filename': model.filename,
+            'filetype': model.filetype,
+            'filepath': model.file.path.replace(settings.MEDIA_ROOT, '')
+        }
+    return dev_info, file_info
 
 def check_params(model, path, request):
+    """
+    use:
+        check client upload file params
+    params:
+        model: create from form
+        path: dst path(like 'waf/5/192.168.1.1-aaaa-bbbb-cccc-dddd/test_waflog_2014_05.zip')
+        request: index view request
+    """
     result_code = ''
     path_list = get_decode_base64_str(path).split('/')
     file_md5 = get_file_md5(model.file)
-    logger.debug(file_md5)
 
     if not check_path(path_list):
-        result_code = '1003' # path error
+        # path error
+        result_code = '1003' 
     elif not check_md5(model.filemd5, file_md5):
-        result_code = '1004' # file md5 different
+        # file md5 different
+        result_code = '1004' 
     elif not check_file_size(model.file.size):
-        result_code = '1001' # file size more than conf.MAX_FILE_SIZE
+        # file size more than conf.MAX_FILE_SIZE
+        result_code = '1001' 
     elif not check_file_ext(model.file.name):
+        # file ext not in conf.ALLOW_FILE_EXTS
         result_code = '1007'
     else:
         model.devtype = path_list[0]
@@ -132,16 +181,35 @@ def check_params(model, path, request):
         model.clientip = get_client_ip(request)
         model.file.field.upload_to = "/".join((model.filetype, conf.DEFAULT_FILE_PATH))
 
+        # normal result code
         result_code = '1000'
     return result_code, model
 
 def check_file_size(size):
+    """
+    use:
+        check file size is or not more than conf.MAX_FILE_SIZE
+    params:
+        size: file size
+    return:
+        True: size < conf.MAX_FILE_SIZE
+        False: size > conf.MAX_FILE_SIZE
+    """
     if size > conf.MAX_FILE_SIZE:
         return False
     else:
         return True
 
 def check_file_ext(filename):
+    """
+    use:
+        check file ext is or not in conf.ALLOW_FILE_EXTS
+    params:
+        filename
+    return:
+        True: file's ext is in conf.ALLOW_FILE_EXTS
+        False: file's ext isn't in conf.ALLOW_FILE_EXTS
+    """
     ext = filename.split('.')[-1]
     if ext in conf.ALLOW_FILE_EXTS:
         return True
@@ -149,6 +217,16 @@ def check_file_ext(filename):
         return False
 
 def check_path(path_list):
+    """
+    use:
+        check dst path
+        (normal example: 'waf/5/192.168.1.1-aaaa-bbbb-cccc-dddd/test_waflog_2014_05.zip')
+    params:
+        path_list: path.split('/')
+    return:
+        True: path is normal
+        False: path is abnormal
+    """
     if len(path_list) == 4: 
         return True
     else:
@@ -175,13 +253,15 @@ def check_md5(md5_1, md5_2):
 
 def index(request):
     """
-    use: return index upload view
+    use: 
+        return index upload view
     params: 
         request: the request from client
     return:
         HttpResponse: the result for upload file (json)
     """
     error_lang = conf.DEFAULT_ERROR_LANG
+    result_code = ''
 
     if request.method == 'POST':
         form = UploadFileForm(request.POST, request.FILES)
@@ -189,32 +269,47 @@ def index(request):
         if form.is_valid():
             model = form.save(commit=False)
             path = form.cleaned_data['path']
+            params = form.cleaned_data['params']
             error_lang = get_error_lang(form)
 
             result_code, model= check_params(model, path, request)
             if result_code == '1000':
                 model.save()
-                dev_info, file_info = get_dev_file_info()
-                plugins_run(dev_info, file_info)
+                
+                dev_info, file_info = get_dev_file_info(model)
+                plugins_run(dev_info, file_info, params)
+
                 logger.info('upload file success')
-            else:
-                return HttpResponse(json.dumps(get_error_info(error_lang, result_code)))
-
-            return HttpResponse(json.dumps(get_error_info(error_lang, '1000')))
+                logger.info('filename:%s client_ip:%s path:%s'%\
+                            (model.filename, model.clientip, model.file.path))
         else:
-            return HttpResponse('form is not valid<br>' + str(form.errors))
+            # '1008': 'upload form insufficient parameters'
+            result_code = '1008'
     else:
-        logger.debug('test log.')
-        return HttpResponse(json.dumps(get_error_info(error_lang, '1006')))
+        # '1006': 'request method error, must be POST'
+        result_code = '1006'
 
-def plugins_run(dev_info, file_info):
+    return HttpResponse(json.dumps(get_error_info(error_lang, result_code)))
+
+def plugins_run(dev_info, file_info, params):
+    """
+    use:
+        run upload plugins in conf.INSTALL_UPLOAD_PLUGINS
+    params:
+        dev_info: dev info from model
+        file_info: file info from model
+    return:
+        None
+    """
     plugin = None
     plugin_model = None
-    for plugin_name in conf.INSTALL_PLUGINS:
+
+    for plugin_name in conf.INSTALL_UPLOAD_PLUGINS:
         try:
-            plugin_model = __import__("".join(('plugins.', plugin_name)), fromlist=[plugin_name])
-            plugin = plugin_model.Plugin({}, {})
+            plugin_model = __import__("".join(('plugins.upload.', plugin_name)), fromlist=[plugin_name])
+            plugin = plugin_model.Plugin(dev_info, file_info, params)
             if plugin.is_run():
                 plugin.run()
-        except Exception,e:
-            print e
+        except:
+            logger.error('fileserver upload plugin run error, plugin name=%s'%plugin_name)
+            logger.error(traceback.format_exc())

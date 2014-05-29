@@ -44,7 +44,7 @@ class LogConfigWatcher(threading.Thread):
                 if mtime > last_mtime:
                     fileConfig(self.cfg_file)
                     last_mtime = mtime
-                    logger = logging.getLogger('portal.root')
+                    logger = logging.getLogger('root')
                     logger.info("load logging configuration from %s",
                             self.cfg_file)
             except Exception, err_msg:
