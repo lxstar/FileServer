@@ -4,20 +4,21 @@
 # -----------------------------------------------------
 #  FileName:    forms.py
 #  Author  :    liuxing2@
-#  Project :    
+#  Project :    fileserver.upload
 #  Date    :    2014-05-16 14:07
-#  Descrip :    
+#  Descrip :    upload.forms
 # -----------------------------------------------------
 
 from django import forms
 from upload.models import UploadFileModel
 
 class UploadFileForm(forms.ModelForm):
-    filemd5 = forms.CharField()
     lang = forms.CharField(required=False)
     params = forms.CharField(required=False)
 
     class Meta:
-        model = UploadFileModel
-        fields = ['file', 'filemd5', 'path']
 
+        # modelForm form UploadFielModel
+        model = UploadFileModel
+        # fields is the field same in model and form
+        fields = ['file', 'filemd5', 'path']

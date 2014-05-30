@@ -1,3 +1,14 @@
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
+
+# -----------------------------------------------------
+#  FileName:    views.py
+#  Author  :    liuxing2@
+#  Project :    fileserver.upload
+#  Date    :    2014-05-28 14:07
+#  Descrip :    upload.models
+# -----------------------------------------------------
+
 from django.db import models
 from fileserver import conf
 

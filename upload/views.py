@@ -4,9 +4,9 @@
 # -----------------------------------------------------
 #  FileName:    views.py
 #  Author  :    liuxing2@
-#  Project :    
+#  Project :    fileserver.upload
 #  Date    :    2014-05-19 13:35
-#  Descrip :    
+#  Descrip :    upload.views
 # -----------------------------------------------------
 
 from django.http import HttpResponse
@@ -161,7 +161,7 @@ def check_params(model, path, request):
     if not check_path(path_list):
         # path error
         result_code = '1003' 
-    elif not check_md5(model.filemd5, file_md5):
+    elif not check_md5(model.filemd5.upper(), file_md5):
         # file md5 different
         result_code = '1004' 
     elif not check_file_size(model.file.size):
@@ -176,7 +176,7 @@ def check_params(model, path, request):
         model.deversion = path_list[1]
         model.devip = path_list[2].split('-')[0]
         model.filename = model.file.name
-        model.filemd5 = file_md5
+        model.filemd5 = file_md5.upper()
         model.filetype = get_file_type(model.file.name)
         model.clientip = get_client_ip(request)
         model.file.field.upload_to = "/".join((model.filetype, conf.DEFAULT_FILE_PATH))
@@ -273,11 +273,12 @@ def index(request):
             error_lang = get_error_lang(form)
 
             result_code, model= check_params(model, path, request)
+            # '1000': 'normal'
             if result_code == '1000':
-                model.save()
-                
+
                 dev_info, file_info = get_dev_file_info(model)
                 plugins_run(dev_info, file_info, params)
+                model.save()
 
                 logger.info('upload file success')
                 logger.info('filename:%s client_ip:%s path:%s'%\

@@ -2,12 +2,12 @@
 # -*- coding: UTF-8 -*-
 
 # -----------------------------------------------------
-#  FileName:    plugin_template.py
+#  FileName:    upload_plugin_template.py
 #  Author  :    liuxing2@
-#  Project :    
-#  Date    :    2014-05-19 13:35
-#  Descrip :    
-# ------------------------------------------------------
+#  Project :    fileserver.plugins
+#  Date    :    2014-05-28 14:07
+#  Descrip :    upload plugin template
+# -----------------------------------------------------
 from fileserver import conf
 
 import redis

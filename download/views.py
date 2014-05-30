@@ -4,22 +4,24 @@
 # -----------------------------------------------------
 #  FileName:    views.py
 #  Author  :    liuxing2@
-#  Project :    
-#  Date    :    2014-05-28 13:35
-#  Descrip :    
+#  Project :    fileserver.download
+#  Date    :    2014-05-28 14:07
+#  Descrip :    download app's views
 # -----------------------------------------------------
 
 from django.http import HttpResponse
 from download.forms import DownloadFileForm
 from download.models import DownloadFileModel
 from upload.models import UploadFileModel
-from fileserver import conf
+from fileserver import conf, settings
 
 import traceback
 import json
-
+import os
 import logging
 
+# logger named 'download'
+# define in logging.cfg's [logger_download]
 logger = logging.getLogger('download')
 
 
@@ -75,8 +77,73 @@ def get_error_info(lang, result_code):
     }
     return error_info
 
-def get_file_path(dstpath):
-    pass
+def get_file_path(dstpath, filemd5=None):
+    """
+    use:
+        get file real path from database with dstpath or filemd5
+        if dstpath and filemd both have:
+            filemd5 worked
+    params:
+        dstpath: the path from client path params
+                 not filepath in fileserver nfs !!!
+        filemd5: file's md5 from client
+    return:
+        realpath: can find in database
+        None: can not find in database
+    """
+    upload_obj = None
+
+    if filemd5:
+        upload_obj = UploadFileModel.objects.filter(filemd5=filemd5).only('id', 'filemd5', 'file').order_by('-id')
+    else:
+        upload_obj = UploadFileModel.objects.filter(path=dstpath).only('id', 'file').order_by('-id')
+    if upload_obj:
+        return os.path.join(settings.MEDIA_ROOT, str(upload_obj[0].file))
+    else:
+        return None
+
+def get_file_response(filepath):
+    """
+    use:
+        get HttpResponse object for download file streaming
+    params:
+        filepath: file real path on fileserver
+    return:
+        FileHttpResponse: realpath right and file is exist
+        None: realpath failed or file isn't exist
+    """
+    if filepath and os.path.isfile(str(filepath)):
+        try:
+            fp = open(str(filepath), 'rb')
+            data = fp.read()
+            fp.close()
+        except:
+            logger.error('download read file error.')
+            logger.error(traceback.format_exc())
+
+        filename = filepath.split('/')[-1]
+
+        response = HttpResponse(data)
+        response['mimetype'] = 'application/octet-stream'
+        response['Content-Disposition'] = 'attachment; filename=%s'%filename
+        return response
+    else:
+        return None
+
+def check_file_path(filepath):
+    """
+    use:
+        check file path is or isn't in conf.ALLOW_SAVE_PATHS
+    params:
+        filepath: file real path
+    return:
+        True or False
+    """
+    if filepath:
+        for start in conf.ALLOW_SAVE_PATHS:
+            if filepath.startswith(start):
+                return True
+    return False
 
 def index(request):
     """
@@ -89,32 +156,41 @@ def index(request):
     """
     error_lang = conf.DEFAULT_ERROR_LANG
     result_code = ''
+    file_response = None
 
-    if request.method == 'POST':
-        form = DownloadFileForm(request.POST)
+    form = DownloadFileForm(request.REQUEST)
 
-        if form.is_valid():
-            error_lang = get_error_lang(form)
+    if form.is_valid():
+        error_lang = get_error_lang(form)
+        
+        dstpath = form.cleaned_data['path']
+        params = form.cleaned_data['params']
+        filemd5 = form.cleaned_data['filemd5'].upper()
+        filepath = plugins_run(dstpath, params)
+
+        if not filepath:
+            filepath = get_file_path(dstpath, filemd5)
+            
+        if filepath and os.path.isfile(str(filepath)) \
+                    and check_file_path(str(filepath)):
+            file_response = get_file_response(filepath)
+
+        if file_response:
             model = form.save(commit=False)
-            dstpath = form.cleaned_data['path']
-            params = form.cleaned_data['params']
-            filepath = plugins_run(dstpath, params)
-            logger.debug('download view run_plugin function')
-
-            if not filepath:
-                filepath = get_file_path(dstpath)
             model.clientip = get_client_ip(request)
             model.filepath = filepath
             model.save()
-
-            result_code = '1000'
         else:
-            # '1008': 'upload form insufficient parameters'
-            result_code = '1008'
+            # '1002': 'file is not exist'
+            result_code = '1002'                
     else:
-        # '1006': 'request method error, must be POST'
-        result_code = '1006'
-    return  HttpResponse(json.dumps(get_error_info(error_lang, result_code)))
+        # '1008': 'upload form insufficient parameters'
+        result_code = '1008'
+
+    if file_response:
+        return file_response
+    else:
+        return  HttpResponse(json.dumps(get_error_info(error_lang, result_code)))
 
 def plugins_run(dstpath, params):
     """

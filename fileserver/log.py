@@ -1,5 +1,14 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
+# -*- coding: UTF-8 -*-
+
+# -----------------------------------------------------
+#  FileName:    log.py
+#  Author  :    liuxing2@
+#  Project :    fileserver.fileserver
+#  Date    :    2014-05-28 14:07
+#  Descrip :    log model for fileserver
+# -----------------------------------------------------
+
 
 """
 File used for loading project's logs.

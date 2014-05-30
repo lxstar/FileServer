@@ -4,25 +4,19 @@
 # -----------------------------------------------------
 #  FileName:    forms.py
 #  Author  :    liuxing2@
-#  Project :    fileserver.download
+#  Project :    fileserver.search
 #  Date    :    2014-05-28 14:07
-#  Descrip :    download object form
+#  Descrip :    handle form form client
 # -----------------------------------------------------
 
 from django import forms
-from download.models import DownloadFileModel
 
-class DownloadFileForm(forms.ModelForm):
+class FindFileForm(forms.Form):
     """
     use:
-        handle download form submit from client
+        model for search find file
     """
-
     filemd5 = forms.CharField(required=False)
     path = forms.CharField()
     lang = forms.CharField(required=False)
     params = forms.CharField(required=False)
-
-    class Meta:
-        model = DownloadFileModel
-        fields = []	

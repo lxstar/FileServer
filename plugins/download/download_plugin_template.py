@@ -2,12 +2,12 @@
 # -*- coding: UTF-8 -*-
 
 # -----------------------------------------------------
-#  FileName:    plugin_template.py
+#  FileName:    download_plugin_template.py
 #  Author  :    liuxing2@
-#  Project :    
-#  Date    :    2014-05-19 13:35
-#  Descrip :    
-# ------------------------------------------------------
+#  Project :    fileserver.plugins
+#  Date    :    2014-05-28 14:07
+#  Descrip :    download plugin template
+# -----------------------------------------------------
 from fileserver import conf
 
 import logging
@@ -32,12 +32,12 @@ class Plugin(object):
 
     def is_run(self):
 
-        logger.debug('download plugin is_run function')
         if True:
             return True
         else:
             return False
 
     def run(self):
-        logger.debug('download plugin run function')
-        return 12345677
+
+        return None
+        return '/tmp/testfile.tar.gz'

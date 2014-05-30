@@ -4,9 +4,9 @@
 # -----------------------------------------------------
 #  FileName:    conf.py
 #  Author  :    liuxing2@
-#  Project :    
-#  Date    :    2014-05-15 16:53
-#  Descrip :    
+#  Project :    fileserver.fileserver
+#  Date    :    2014-05-28 14:07
+#  Descrip :    configuration for fileserver project
 # -----------------------------------------------------
 
 
@@ -69,5 +69,5 @@ REDIS_PORT = '6379'
 
 # allow save file path
 ALLOW_SAVE_PATHS = [
-    '/tmp/fileserver/',    
+    '/tmp/fileserver/',  
 ]

@@ -1,4 +1,13 @@
-# Django settings for fileserver project.
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
+
+# -----------------------------------------------------
+#  FileName:    settings.py
+#  Author  :    liuxing2@
+#  Project :    fileserver.fileserver
+#  Date    :    2014-05-28 14:07
+#  Descrip :    settings for fileserver project
+# -----------------------------------------------------
 
 from log import init_log
 import logging
@@ -122,12 +131,14 @@ INSTALLED_APPS = (
     'upload',
     'download',
     'plugins',
+    'search',
     # Uncomment the next line to enable the admin:
     # 'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
 )
 
+# logging configuration
 LOGGING_CONFIG_FILE = os.path.join(os.path.dirname(__file__), 'logging.cfg')
 init_log(LOGGING_CONFIG_FILE)
 logging.getLogger('django.db.backends').setLevel(logging.ERROR)
