@@ -40,8 +40,9 @@ class Plugin(object):
             return False
 
     def run(self):
-
-        self.push_redis('fileserver_test', self.file_info.get('filepath'))
+	
+	logger.debug('test upload plugin run function success!')
+        # self.push_redis('fileserver_test', self.file_info.get('filepath'))
         return True
 
     def push_redis(self, queue_name, queue_value):

@@ -31,13 +31,12 @@ class Plugin(object):
         self.params = params
 
     def is_run(self):
-
-        if True:
+	
+        if self.params == 'nsfocus':
             return True
         else:
             return False
 
     def run(self):
 
-        return None
         return '/tmp/testfile.tar.gz'
